@@ -1,0 +1,736 @@
+/* ==========================================================================
+   Big Play Entertainment — Players Club Redemption Portal
+   Stylesheet
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Design Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* Brand colors */
+  --color-bg: #111111;
+  --color-card: #1e1e1e;
+  --color-card-raised: #242424;
+  --color-primary: #ff4b2b;
+  --color-secondary: #ff7a29;
+  --color-accent: #1e88e5;
+  --color-success: #2ecc71;
+  --color-warning: #ffc107;
+  --color-error: #e53935;
+  --color-text: #ffffff;
+  --color-text-secondary: #b8b8b8;
+
+  /* Derived surfaces */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-overlay: rgba(0, 0, 0, 0.35);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  --gradient-success: linear-gradient(135deg, #2ecc71, #1abc9c);
+  --gradient-error: linear-gradient(135deg, #e53935, #c62828);
+
+  /* Typography */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.9375rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --font-size-2xl: 2.25rem;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+
+  /* Radii & elevation */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-focus: 0 0 0 3px rgba(30, 136, 229, 0.45);
+
+  /* Motion */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(255, 75, 43, 0.10), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(30, 136, 229, 0.08), transparent 50%);
+  background-attachment: fixed;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+}
+
+ul,
+dl,
+dd {
+  margin: 0;
+  padding: 0;
+}
+
+/* --------------------------------------------------------------------------
+   3. Layout Shell
+   -------------------------------------------------------------------------- */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   4. Header
+   -------------------------------------------------------------------------- */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.site-header__logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.site-header__titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.site-header__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.site-header__subtitle {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge--employee {
+  color: var(--color-accent);
+  background: rgba(30, 136, 229, 0.14);
+  border: 1px solid rgba(30, 136, 229, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   5. Redemption Card
+   -------------------------------------------------------------------------- */
+.redemption-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-7) var(--space-6);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.redemption-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.card-state--active {
+  display: flex;
+  animation: fadeIn var(--transition-slow);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+  color: var(--color-primary);
+  background: rgba(255, 75, 43, 0.12);
+}
+
+.card-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.card-copy {
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  max-width: 38ch;
+}
+
+/* --------------------------------------------------------------------------
+   6. Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--space-3) var(--space-5);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), opacity var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--large {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--font-size-md);
+  min-height: 52px;
+}
+
+.btn--primary {
+  color: var(--color-text);
+  background: var(--gradient-primary);
+  box-shadow: 0 4px 14px rgba(255, 75, 43, 0.35);
+}
+
+.btn--primary:hover {
+  box-shadow: 0 6px 20px rgba(255, 75, 43, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn--secondary {
+  color: var(--color-text);
+  background: var(--color-card-raised);
+  border: 1px solid var(--color-border-strong);
+  padding: var(--space-3) var(--space-5);
+}
+
+.btn--secondary:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn--ghost {
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  flex: 1;
+}
+
+.btn--ghost:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-secondary);
+}
+
+.card-actions {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+  margin-top: var(--space-6);
+}
+
+.card-actions .btn--primary {
+  flex: 2;
+}
+
+/* --------------------------------------------------------------------------
+   7. Divider
+   -------------------------------------------------------------------------- */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  margin: var(--space-6) 0 var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-strong);
+}
+
+/* --------------------------------------------------------------------------
+   8. Form
+   -------------------------------------------------------------------------- */
+.search-form {
+  width: 100%;
+  text-align: left;
+}
+
+.field-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.input-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.text-input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background: #161616;
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.text-input::placeholder {
+  color: #6f6f6f;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus);
+}
+
+.text-input.is-invalid {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.25);
+}
+
+.field-hint {
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.field-hint code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* --------------------------------------------------------------------------
+   9. Loading State
+   -------------------------------------------------------------------------- */
+.spinner {
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-5);
+  position: relative;
+}
+
+.spinner__ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--color-primary);
+  border-right-color: var(--color-secondary);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   10. Customer Found State
+   -------------------------------------------------------------------------- */
+.customer-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  margin-bottom: var(--space-5);
+  text-align: left;
+}
+
+.customer-avatar {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.customer-header__info {
+  min-width: 0;
+}
+
+.customer-name {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  background: rgba(46, 204, 113, 0.14);
+  color: var(--color-success);
+  border: 1px solid rgba(46, 204, 113, 0.35);
+}
+
+.status-pill.status-pill--warning {
+  background: rgba(255, 193, 7, 0.14);
+  color: var(--color-warning);
+  border-color: rgba(255, 193, 7, 0.35);
+}
+
+.detail-list {
+  width: 100%;
+  text-align: left;
+  background: #161616;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row dt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.detail-row dd {
+  font-weight: 600;
+  text-align: right;
+  font-size: var(--font-size-sm);
+}
+
+.tag {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tag--ready {
+  background: rgba(46, 204, 113, 0.14);
+  color: var(--color-success);
+}
+
+.tag--redeemed {
+  background: rgba(184, 184, 184, 0.14);
+  color: var(--color-text-secondary);
+}
+
+.tag--expired {
+  background: rgba(229, 57, 53, 0.14);
+  color: var(--color-error);
+}
+
+/* --------------------------------------------------------------------------
+   11. Success / Failure States
+   -------------------------------------------------------------------------- */
+.result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  margin-bottom: var(--space-5);
+  animation: popIn var(--transition-slow);
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.result-icon--success {
+  color: var(--color-success);
+  background: rgba(46, 204, 113, 0.12);
+  box-shadow: 0 0 0 8px rgba(46, 204, 113, 0.08);
+}
+
+.result-icon--error {
+  color: var(--color-error);
+  background: rgba(229, 57, 53, 0.12);
+  box-shadow: 0 0 0 8px rgba(229, 57, 53, 0.08);
+}
+
+.result-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.result-title--success {
+  color: var(--color-success);
+}
+
+.result-title--error {
+  color: var(--color-error);
+}
+
+.detail-list--receipt {
+  margin: var(--space-2) 0 var(--space-6);
+}
+
+/* --------------------------------------------------------------------------
+   12. Footer
+   -------------------------------------------------------------------------- */
+.site-footer {
+  text-align: center;
+  padding: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* --------------------------------------------------------------------------
+   13. Toast / Inline Errors
+   -------------------------------------------------------------------------- */
+.error-text {
+  width: 100%;
+  text-align: left;
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-2);
+  min-height: 1em;
+}
+
+/* --------------------------------------------------------------------------
+   14. Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+
+/* Tablet / iPad portrait */
+@media (max-width: 768px) {
+  .site-header {
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .redemption-card {
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .site-header__title {
+    font-size: var(--font-size-md);
+    white-space: normal;
+  }
+
+  .main {
+    padding: var(--space-4) var(--space-3) var(--space-6);
+  }
+
+  .redemption-card {
+    padding: var(--space-5) var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  .input-group {
+    flex-direction: column;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .card-actions .btn--ghost {
+    order: 2;
+  }
+}
+
+/* Landscape / short viewport (e.g. tablet landscape) */
+@media (max-height: 500px) and (orientation: landscape) {
+  .main {
+    align-items: center;
+    padding: var(--space-4);
+  }
+
+  .redemption-card {
+    padding: var(--space-5);
+  }
+
+  .card-icon,
+  .result-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: var(--space-3);
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+  .redemption-card {
+    max-width: 520px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
