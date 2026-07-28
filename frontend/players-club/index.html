@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Players Club Redemption Portal | Big Play Entertainment</title>
+  <meta name="description" content="Employee portal for redeeming Big Play Entertainment Players Club promotions and rewards." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Header -->
+    <header class="site-header">
+      <div class="site-header__brand">
+        <img class="site-header__logo" src="assets/logo.png" alt="Big Play Entertainment logo" />
+        <div class="site-header__titles">
+          <h1 class="site-header__title">Players Club Redemption Portal</h1>
+          <p class="site-header__subtitle">Big Play Entertainment</p>
+        </div>
+      </div>
+      <span class="badge badge--employee">Employee Portal</span>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <section class="redemption-card" id="redemptionCard" aria-live="polite">
+
+        <!-- STATE: Default / Search -->
+        <div class="card-state card-state--active" data-state="search" id="stateSearch">
+          <div class="card-icon card-icon--scan" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M3 7V4a1 1 0 0 1 1-1h3M17 3h3a1 1 0 0 1 1 1v3M21 17v3a1 1 0 0 1-1 1h-3M7 21H4a1 1 0 0 1-1-1v-3" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="7" y="7" width="10" height="10" rx="1" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="card-title">Scan Customer QR Code</h2>
+          <p class="card-copy">Ask the customer to present their Players Club QR code, or scan it directly with your device camera.</p>
+
+          <button class="btn btn--primary btn--large" id="btnScanQr" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2"/></svg>
+            Scan QR Code
+          </button>
+
+          <div class="divider"><span>OR</span></div>
+
+          <form class="search-form" id="searchForm" novalidate>
+            <label class="field-label" for="membershipId">Enter Membership ID</label>
+            <div class="input-group">
+              <input
+                class="text-input"
+                type="text"
+                id="membershipId"
+                name="membershipId"
+                placeholder="e.g. BP-100234"
+                autocomplete="off"
+                inputmode="text"
+              />
+              <button class="btn btn--secondary" type="submit" id="btnLookup">Look Up</button>
+            </div>
+            <p class="field-hint">Try <code>BP-100234</code>, <code>BP-100777</code>, or <code>BP-100999</code> for demo data.</p>
+          </form>
+        </div>
+
+        <!-- STATE: Loading -->
+        <div class="card-state" data-state="loading" id="stateLoading">
+          <div class="spinner" role="status" aria-label="Loading">
+            <span class="spinner__ring"></span>
+          </div>
+          <p class="loading-text">Looking up customer&hellip;</p>
+        </div>
+
+        <!-- STATE: Customer Found -->
+        <div class="card-state" data-state="customer" id="stateCustomer">
+          <div class="customer-header">
+            <div class="customer-avatar" id="customerAvatar" aria-hidden="true"></div>
+            <div class="customer-header__info">
+              <h2 class="customer-name" id="customerName">&mdash;</h2>
+              <span class="status-pill" id="customerStatus">&mdash;</span>
+            </div>
+          </div>
+
+          <dl class="detail-list">
+            <div class="detail-row">
+              <dt>Membership ID</dt>
+              <dd id="customerMembershipId">&mdash;</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Promotion</dt>
+              <dd id="customerPromotion">&mdash;</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Reward</dt>
+              <dd id="customerReward">&mdash;</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Redemption Status</dt>
+              <dd><span class="tag" id="customerRedemptionStatus">&mdash;</span></dd>
+            </div>
+          </dl>
+
+          <div class="card-actions">
+            <button class="btn btn--ghost" id="btnCancel" type="button">Cancel</button>
+            <button class="btn btn--primary btn--large" id="btnRedeem" type="button">Redeem Reward</button>
+          </div>
+        </div>
+
+        <!-- STATE: Success -->
+        <div class="card-state" data-state="success" id="stateSuccess">
+          <div class="result-icon result-icon--success" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h2 class="result-title result-title--success">Reward Redeemed!</h2>
+          <p class="card-copy">The reward has been successfully applied to the customer's account.</p>
+
+          <dl class="detail-list detail-list--receipt">
+            <div class="detail-row">
+              <dt>Customer</dt>
+              <dd id="successCustomer">&mdash;</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Reward</dt>
+              <dd id="successReward">&mdash;</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Date &amp; Time</dt>
+              <dd id="successDate">&mdash;</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Transaction ID</dt>
+              <dd id="successTransactionId">&mdash;</dd>
+            </div>
+          </dl>
+
+          <button class="btn btn--primary btn--large" id="btnNewRedemption" type="button">Start New Redemption</button>
+        </div>
+
+        <!-- STATE: Failure -->
+        <div class="card-state" data-state="failure" id="stateFailure">
+          <div class="result-icon result-icon--error" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01" stroke-linecap="round"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <h2 class="result-title result-title--error" id="failureTitle">Customer Not Found</h2>
+          <p class="card-copy" id="failureMessage">We couldn't find a Players Club member with that ID. Please check the membership ID and try again.</p>
+          <button class="btn btn--primary btn--large" id="btnTryAgain" type="button">Try Again</button>
+        </div>
+
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; <span id="year"></span> Big Play Entertainment &mdash; Internal Use Only</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
