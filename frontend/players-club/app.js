@@ -1,12 +1,12 @@
 /**
  * Big Play Entertainment — Players Club Redemption Portal
- * Phase 1: Frontend-only prototype backed by mock customer data.
  *
  * Architecture notes:
  *  - `CustomerService` is the single seam this app talks to for lookups/redemptions.
- *    In Phase 1 it resolves against MOCK_CUSTOMERS. Swapping it for real HTTP calls
- *    to the future Node/Express API (GoHighLevel/Toast/Intercard-backed) should not
- *    require touching the UI controller below.
+ *    It calls the Cloudflare Worker API (backend/worker), which proxies to
+ *    GoHighLevel and keeps the API key server-side. The Worker falls back to
+ *    mock data automatically when it has no GHL key configured, so this file
+ *    behaves identically against a live or demo backend.
  *  - `UIController` owns DOM state transitions only; it has no knowledge of where
  *    customer data comes from.
  */
@@ -15,43 +15,15 @@
   "use strict";
 
   /* ------------------------------------------------------------------
-   * Mock Data (Phase 1 — replaced by backend API in a later phase)
+   * Config
    * ---------------------------------------------------------------- */
-  const MOCK_CUSTOMERS = {
-    "BP-100234": {
-      membershipId: "BP-100234",
-      name: "John Smith",
-      membershipStatus: "Players Club Member",
-      eligibility: "Eligible",
-      promotion: "Summer Free Play Giveaway",
-      reward: "Free $10 Game Card",
-      redemptionState: "ready", // ready | redeemed | expired
-    },
-    "BP-100777": {
-      membershipId: "BP-100777",
-      name: "Maria Alvarez",
-      membershipStatus: "Players Club VIP",
-      eligibility: "Eligible",
-      promotion: "Birthday Rewards",
-      reward: "50 Bonus Arcade Credits",
-      redemptionState: "redeemed",
-    },
-    "BP-100999": {
-      membershipId: "BP-100999",
-      name: "David Chen",
-      membershipStatus: "Players Club Member",
-      eligibility: "Eligible",
-      promotion: "Holiday Promotion",
-      reward: "Free Laser Tag Pass",
-      redemptionState: "expired",
-    },
-  };
-
-  const SIMULATED_LOOKUP_DELAY_MS = 900;
-  const SIMULATED_REDEEM_DELAY_MS = 1100;
+  // Points at the Worker deployment. Override by setting
+  // `window.BP_API_BASE_URL` before this script loads (e.g. in a small
+  // inline snippet per-environment) for local dev vs. production.
+  const API_BASE_URL = window.BP_API_BASE_URL || "";
 
   /* ------------------------------------------------------------------
-   * Customer Service — mock data access layer
+   * Customer Service — talks to the backend API
    * ---------------------------------------------------------------- */
   const CustomerService = {
     /**
@@ -59,19 +31,19 @@
      * @param {string} membershipId
      * @returns {Promise<{ok: true, customer: object} | {ok: false, reason: string}>}
      */
-    lookup(membershipId) {
+    async lookup(membershipId) {
       const normalizedId = membershipId.trim().toUpperCase();
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const customer = MOCK_CUSTOMERS[normalizedId];
-          if (!customer) {
-            resolve({ ok: false, reason: "not_found" });
-            return;
-          }
-          resolve({ ok: true, customer: { ...customer } });
-        }, SIMULATED_LOOKUP_DELAY_MS);
-      });
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/customers/lookup?membershipId=${encodeURIComponent(normalizedId)}`
+        );
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Customer lookup failed", error);
+        return { ok: false, reason: "network_error" };
+      }
     },
 
     /**
@@ -79,40 +51,25 @@
      * @param {object} customer
      * @returns {Promise<{ok: true, transaction: object} | {ok: false, reason: string}>}
      */
-    redeem(customer) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          if (customer.redemptionState === "redeemed") {
-            resolve({ ok: false, reason: "already_redeemed" });
-            return;
-          }
-          if (customer.redemptionState === "expired") {
-            resolve({ ok: false, reason: "expired" });
-            return;
-          }
-
-          // Mark redeemed in the mock store so re-lookups reflect the change.
-          if (MOCK_CUSTOMERS[customer.membershipId]) {
-            MOCK_CUSTOMERS[customer.membershipId].redemptionState = "redeemed";
-          }
-
-          resolve({
-            ok: true,
-            transaction: {
-              transactionId: generateTransactionId(),
-              redeemedAt: new Date(),
-            },
-          });
-        }, SIMULATED_REDEEM_DELAY_MS);
-      });
+    async redeem(customer) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/redemptions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            membershipId: customer.membershipId,
+            ghlContactId: customer.ghlContactId,
+            redemptionState: customer.redemptionState,
+          }),
+        });
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Redemption failed", error);
+        return { ok: false, reason: "network_error" };
+      }
     },
   };
-
-  function generateTransactionId() {
-    const random = Math.random().toString(36).slice(2, 8).toUpperCase();
-    const timestamp = Date.now().toString(36).toUpperCase();
-    return `TXN-${timestamp}-${random}`;
-  }
 
   function getInitials(fullName) {
     return fullName
@@ -149,6 +106,14 @@
     expired: {
       title: "Promotion Expired",
       message: "This promotion has expired and is no longer eligible for redemption.",
+    },
+    network_error: {
+      title: "Connection Problem",
+      message: "We couldn't reach the server. Check your connection and try again.",
+    },
+    upstream_error: {
+      title: "Service Unavailable",
+      message: "The Players Club system is temporarily unavailable. Please try again shortly.",
     },
   };
 
@@ -233,7 +198,7 @@
     function renderSuccess(customer, transaction) {
       elements.successCustomer.textContent = customer.name;
       elements.successReward.textContent = customer.reward;
-      elements.successDate.textContent = formatDateTime(transaction.redeemedAt);
+      elements.successDate.textContent = formatDateTime(new Date(transaction.redeemedAt));
       elements.successTransactionId.textContent = transaction.transactionId;
       showState("success");
     }

@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local `wrangler dev` (never commit the real file).
+GHL_API_KEY=
+GHL_LOCATION_ID=
+ALLOWED_ORIGIN=http://localhost:8080

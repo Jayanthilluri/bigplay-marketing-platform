@@ -1,0 +1,17 @@
+name = "bigplay-players-club-api"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+[vars]
+# Public, non-secret config. Set the real values for your environment.
+ALLOWED_ORIGIN = "*"
+GHL_LOCATION_ID = ""
+GHL_FIELD_MEMBERSHIP_ID = "membership_id"
+GHL_FIELD_MEMBERSHIP_STATUS = "membership_status"
+GHL_FIELD_PROMOTION = "active_promotion"
+GHL_FIELD_REWARD = "active_reward"
+GHL_FIELD_REDEMPTION_STATUS = "redemption_status"
+GHL_FIELD_REDEEMED_AT = "redeemed_at"
+
+# GHL_API_KEY is a SECRET — never put it here.
+# Set it with: wrangler secret put GHL_API_KEY
