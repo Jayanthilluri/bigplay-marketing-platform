@@ -1,0 +1,15 @@
+{
+  "name": "bigplay-players-club-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker API proxying Players Club redemption requests to GoHighLevel.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}

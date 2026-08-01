@@ -6,23 +6,36 @@ platform for Big Play Entertainment.
 ## Module 1: Players Club Redemption Portal
 
 Employee-facing tool for looking up Players Club members and redeeming
-their available promotions/rewards.
+their available promotions/rewards, backed by GoHighLevel.
 
-**Status:** Phase 1 — frontend prototype with mock data (no backend yet).
+**Status:** Live-data phase — Cloudflare Worker backend proxying GoHighLevel
+contacts. See [`docs/ghl-integration.md`](docs/ghl-integration.md) for setup
+and deployment.
 
 ### Run it locally
 
-The Phase 1 portal is fully static. Serve `frontend/players-club/` with any
-static file server, e.g.:
+**Backend (Worker):**
+
+```bash
+cd backend/worker
+npm install
+npx wrangler dev
+```
+
+Without a `GHL_API_KEY` configured, the Worker automatically serves the same
+mock data as before, so it runs standalone with no GHL account needed.
+
+**Frontend:**
 
 ```bash
 cd frontend/players-club
 python3 -m http.server 8080
 ```
 
-Then open `http://localhost:8080` in a browser.
+Then open `http://localhost:8080`, with `window.BP_API_BASE_URL` in
+`index.html` pointed at the Worker (`http://localhost:8787` for local dev).
 
-Demo membership IDs:
+Demo membership IDs (mock mode):
 
 | Membership ID | Scenario |
 | --- | --- |
@@ -35,29 +48,35 @@ Demo membership IDs:
 
 ```
 frontend/
-  players-club/        # Players Club Redemption Portal (Phase 1)
+  players-club/        # Players Club Redemption Portal
     index.html
     styles.css
     app.js
     assets/             # Logo and static images
     icons/              # UI icon assets
 
-backend/                # Reserved for the future Node/Express REST API
-  api/
-  routes/
-  controllers/
-  middleware/
-  services/
+backend/
+  worker/               # Cloudflare Worker: GHL proxy API (live backend)
+    src/
+      index.js
+      routes/
+      services/         # ghlClient.js (real GHL calls), mockData.js (fallback)
+      middleware/
+    wrangler.toml
+  api/ routes/ controllers/ middleware/ services/
+                        # Reserved for a future standalone Node/Express API
 
-docs/                   # Project documentation
+docs/
+  ghl-integration.md    # GHL field setup, secrets, deploy steps, pre-launch checklist
 ```
 
 ## Tech Stack
 
 - **Frontend:** HTML5, CSS3, vanilla JavaScript (ES6+), mobile-first responsive design
-- **Backend (future):** Node.js, Express, REST API
-- **Future integrations:** GoHighLevel, Toast POS, Intercard, Brunswick, Zapier
-- **Deployment:** GitHub, Cloudflare Pages, Cloudflare Workers (future)
+- **Backend:** Cloudflare Worker (GHL proxy); Node/Express reserved for future modules
+- **Live integration:** GoHighLevel (Contacts API)
+- **Future integrations:** Toast POS, Intercard, Brunswick, Zapier
+- **Deployment:** GitHub, Cloudflare Pages, Cloudflare Workers
 
 ## Roadmap
 
@@ -68,4 +87,4 @@ Planned, not yet implemented:
 - Promotion engine (birthday, corporate, holiday promotions)
 - QR code generator
 - Analytics dashboard
-- GoHighLevel, Toast, and Intercard integrations
+- Toast and Intercard integrations
