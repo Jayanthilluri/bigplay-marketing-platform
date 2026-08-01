@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: bigplay-players-club-api
+    runtime: node
+    plan: free
+    rootDir: backend-render
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: GHL_API_KEY
+        sync: false
+      - key: GHL_LOCATION_ID
+        sync: false
+      - key: GHL_FIELD_MEMBERSHIP_ID
+        value: membership_id
+      - key: GHL_FIELD_MEMBERSHIP_STATUS
+        value: membership_status
+      - key: GHL_FIELD_PROMOTION
+        value: active_promotion
+      - key: GHL_FIELD_REWARD
+        value: active_reward
+      - key: GHL_FIELD_REDEMPTION_STATUS
+        value: redemption_status
+      - key: GHL_FIELD_REDEEMED_AT
+        value: redeemed_at
+      - key: ALLOWED_ORIGIN
+        sync: false
