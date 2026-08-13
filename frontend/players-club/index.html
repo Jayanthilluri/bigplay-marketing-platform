@@ -20,12 +20,53 @@
           <p class="site-header__subtitle">Big Play Entertainment</p>
         </div>
       </div>
-      <span class="badge badge--employee">Employee Portal</span>
+      <div class="site-header__session">
+        <span class="badge badge--employee" id="employeeBadge">Employee Portal</span>
+        <button class="btn btn--ghost btn--compact is-hidden" id="btnLogout" type="button">Log Out</button>
+      </div>
     </header>
 
     <!-- Main -->
     <main class="main">
       <section class="redemption-card" id="redemptionCard" aria-live="polite">
+
+        <!-- STATE: Employee Login -->
+        <div class="card-state" data-state="login" id="stateLogin">
+          <div class="card-icon card-icon--scan" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6">
+              <rect x="4" y="10" width="16" height="10" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="15" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <h2 class="card-title">Employee Access</h2>
+          <p class="card-copy">Enter your employee PIN to open the redemption portal.</p>
+
+          <form class="search-form" id="loginForm" novalidate>
+            <label class="field-label" for="loginPin">Employee PIN</label>
+            <input
+              class="text-input text-input--pin"
+              type="password"
+              id="loginPin"
+              name="loginPin"
+              placeholder="&bull;&bull;&bull;&bull;"
+              autocomplete="off"
+              inputmode="numeric"
+            />
+            <label class="field-label field-label--spaced" for="loginName">Your name <span class="field-label__optional">(optional, for the redemption log)</span></label>
+            <input
+              class="text-input"
+              type="text"
+              id="loginName"
+              name="loginName"
+              placeholder="e.g. Alex"
+              autocomplete="off"
+              maxlength="64"
+            />
+            <p class="error-text" id="loginError" role="alert"></p>
+            <button class="btn btn--primary btn--large" type="submit" id="btnSignIn">Sign In</button>
+          </form>
+        </div>
 
         <!-- STATE: Default / Search -->
         <div class="card-state card-state--active" data-state="search" id="stateSearch">
@@ -82,7 +123,7 @@
           </div>
 
           <dl class="detail-list">
-            <div class="detail-row">
+            <div class="detail-row is-hidden" id="rowMembershipId">
               <dt>Membership ID</dt>
               <dd id="customerMembershipId">&mdash;</dd>
             </div>
@@ -111,7 +152,7 @@
           <div class="result-icon result-icon--success" aria-hidden="true">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h2 class="result-title result-title--success">Reward Redeemed!</h2>
+          <h2 class="result-title result-title--success">Redemption Successful</h2>
           <p class="card-copy">The reward has been successfully applied to the customer's account.</p>
 
           <dl class="detail-list detail-list--receipt">
@@ -133,7 +174,7 @@
             </div>
           </dl>
 
-          <button class="btn btn--primary btn--large" id="btnNewRedemption" type="button">Start New Redemption</button>
+          <button class="btn btn--primary btn--large" id="btnNewRedemption" type="button">Done &mdash; Scan Next Member</button>
         </div>
 
         <!-- STATE: Failure -->
@@ -154,11 +195,25 @@
     </footer>
   </div>
 
+  <!-- Camera QR scanner overlay (hidden until "Scan QR Code" is tapped) -->
+  <div class="scanner-overlay is-hidden" id="scannerOverlay" role="dialog" aria-modal="true" aria-label="QR code scanner">
+    <div class="scanner-panel">
+      <h2 class="scanner-title">Scan Member QR Code</h2>
+      <div class="scanner-viewport" id="qrReader"></div>
+      <p class="scanner-hint" id="scannerHint">Point the camera at the customer's Players Club QR code.</p>
+      <p class="error-text scanner-error" id="scannerError" role="alert"></p>
+      <button class="btn btn--ghost btn--large" id="btnCloseScanner" type="button">Cancel</button>
+    </div>
+  </div>
+
   <!--
     Set the deployed backend Worker URL here per environment. Leave empty
     for same-origin deployments. See docs/ghl-integration.md.
   -->
   <script>window.BP_API_BASE_URL = "https://bigplay-marketing-platform.onrender.com";</script>
+  <!-- Camera QR decoding (html5-qrcode v2.3.8, vendored — no CDN dependency
+       at the register, and the exact bytes are pinned in this repo). -->
+  <script src="vendor/html5-qrcode-2.3.8.min.js" defer></script>
   <script src="app.js"></script>
 </body>
 </html>
