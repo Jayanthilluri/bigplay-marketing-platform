@@ -5,7 +5,7 @@ compatibility_date = "2026-07-01"
 [vars]
 # Public, non-secret config. Set the real values for your environment.
 ALLOWED_ORIGIN = "*"
-GHL_LOCATION_ID = ""
+GHL_LOCATION_ID = "6oWVUr5GVo8EzTzJCIl0"
 GHL_FIELD_MEMBERSHIP_ID = "membership_id"
 GHL_FIELD_MEMBERSHIP_STATUS = "membership_status"
 GHL_FIELD_PROMOTION = "active_promotion"

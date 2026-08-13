@@ -20,7 +20,7 @@
   // Points at the Worker deployment. Override by setting
   // `window.BP_API_BASE_URL` before this script loads (e.g. in a small
   // inline snippet per-environment) for local dev vs. production.
-  const API_BASE_URL = window.BP_API_BASE_URL || "";
+  const API_BASE_URL = "https://bigplay-marketing-platform.onrender.com";
 
   /* ------------------------------------------------------------------
    * Customer Service — talks to the backend API
@@ -32,7 +32,7 @@
      * @returns {Promise<{ok: true, customer: object} | {ok: false, reason: string}>}
      */
     async lookup(membershipId) {
-      const normalizedId = membershipId.trim().toUpperCase();
+      const normalizedId = membershipId.trim();
 
       try {
         const response = await fetch(
@@ -212,23 +212,26 @@
     }
 
     async function handleLookup(membershipId) {
-      if (!membershipId) {
-        elements.membershipInput.classList.add("is-invalid");
-        elements.membershipInput.focus();
-        return;
-      }
+  if (!membershipId) {
+    elements.membershipInput.classList.add("is-invalid");
+    elements.membershipInput.focus();
+    return;
+  }
 
-      elements.membershipInput.classList.remove("is-invalid");
-      showState("loading");
+  elements.membershipInput.classList.remove("is-invalid");
+  showState("loading");
 
-      const result = await CustomerService.lookup(membershipId);
+  // Show the ID in the input when launched from a QR
+  elements.membershipInput.value = membershipId;
 
-      if (result.ok) {
-        renderCustomer(result.customer);
-      } else {
-        renderFailure(result.reason);
-      }
-    }
+  const result = await CustomerService.lookup(membershipId);
+
+  if (result.ok) {
+    renderCustomer(result.customer);
+  } else {
+    renderFailure(result.reason);
+  }
+}
 
     async function handleRedeem() {
       if (!activeCustomer || activeCustomer.redemptionState !== "ready") {
@@ -286,9 +289,26 @@
   document.addEventListener("DOMContentLoaded", () => {
     UIController.init();
 
-    const yearEl = document.getElementById("year");
-    if (yearEl) {
-      yearEl.textContent = new Date().getFullYear().toString();
+  const yearEl = document.getElementById("year");
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear().toString();
+  }
+
+  // Auto lookup from QR code
+  const params = new URLSearchParams(window.location.search);
+
+  const id =
+    params.get("contactId") ||
+    params.get("membershipId");
+
+  if (id) {
+    const input = document.getElementById("membershipId");
+    if (input) {
+      input.value = id;
     }
-  });
+
+    // Trigger the existing form submit
+    document.getElementById("searchForm").requestSubmit();
+  }
+});
 })();
