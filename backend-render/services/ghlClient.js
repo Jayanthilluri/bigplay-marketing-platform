@@ -82,6 +82,30 @@ function mapContactToCustomer(contact) {
 }
 
 /**
+ * Fetches a single contact directly by its GHL contact ID.
+ * Used for QR codes that carry ?contactId=<GHL id>. Treats "bad id"
+ * responses (400/404/422) as not-found rather than upstream errors, since
+ * arbitrary employee-typed strings also flow through here as a fallback.
+ * @returns {Promise<object|null>} mapped customer, or null if not found
+ */
+async function getContactById(contactId) {
+  const response = await axios.get(
+    `${GHL_API_BASE}/contacts/${encodeURIComponent(contactId)}`,
+    { headers: buildHeaders(), validateStatus: () => true }
+  );
+
+  if ([400, 404, 422].includes(response.status)) return null;
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`GHL get contact failed (${response.status}): ${JSON.stringify(response.data)}`);
+  }
+
+  const contact = response.data.contact || response.data;
+  if (!contact || !contact.id) return null;
+
+  return mapContactToCustomer(contact);
+}
+
+/**
  * Looks up a single contact by the membership ID custom field.
  * @returns {Promise<object|null>} mapped customer, or null if not found
  */
@@ -116,19 +140,28 @@ async function findCustomerByMembershipId(membershipId) {
 
 /**
  * Marks the active reward as redeemed on the contact record.
+ * `redeemedBy` is only written when the optional GHL_FIELD_REDEEMED_BY env
+ * var names a custom field — this way the audit column can be added in GHL
+ * later without blocking deployment (see docs/ghl-integration.md).
  * @returns {Promise<{ok: boolean}>}
  */
-async function redeemCustomerReward(ghlContactId, redeemedAtIso) {
+async function redeemCustomerReward(ghlContactId, redeemedAtIso, redeemedBy) {
   const keys = fieldKeys();
 
+  const customFields = [
+    { key: keys.redemptionStatus, field_value: "redeemed" },
+    { key: keys.redeemedAt, field_value: redeemedAtIso },
+  ];
+  if (process.env.GHL_FIELD_REDEEMED_BY && redeemedBy) {
+    customFields.push({
+      key: process.env.GHL_FIELD_REDEEMED_BY,
+      field_value: String(redeemedBy).slice(0, 64),
+    });
+  }
+
   const response = await axios.put(
-    `${GHL_API_BASE}/contacts/${ghlContactId}`,
-    {
-      customFields: [
-        { key: keys.redemptionStatus, field_value: "redeemed" },
-        { key: keys.redeemedAt, field_value: redeemedAtIso },
-      ],
-    },
+    `${GHL_API_BASE}/contacts/${encodeURIComponent(ghlContactId)}`,
+    { customFields },
     { headers: buildHeaders(), validateStatus: () => true }
   );
 
@@ -139,8 +172,18 @@ async function redeemCustomerReward(ghlContactId, redeemedAtIso) {
   return { ok: true };
 }
 
+/**
+ * Shared validator for identifiers arriving from the browser (membership
+ * IDs and GHL contact IDs). Rejects anything that couldn't be either.
+ */
+function isValidCustomerId(value) {
+  return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(value);
+}
+
 module.exports = {
   findCustomerByMembershipId,
+  getContactById,
   redeemCustomerReward,
   mapContactToCustomer,
+  isValidCustomerId,
 };

@@ -651,6 +651,117 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   13b. Utilities
+   -------------------------------------------------------------------------- */
+.is-hidden {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   13c. Employee Login
+   -------------------------------------------------------------------------- */
+.site-header__session {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.btn--compact {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-xs);
+  flex: 0 0 auto;
+}
+
+.text-input--pin {
+  width: 100%;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  letter-spacing: 0.35em;
+}
+
+#loginForm .text-input {
+  width: 100%;
+}
+
+#loginForm .btn--primary {
+  margin-top: var(--space-4);
+}
+
+.field-label--spaced {
+  margin-top: var(--space-4);
+}
+
+.field-label__optional {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   13d. QR Scanner Overlay
+   -------------------------------------------------------------------------- */
+.scanner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+.scanner-panel {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card-hover);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn var(--transition-slow);
+}
+
+.scanner-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.scanner-viewport {
+  width: 100%;
+  min-height: 240px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #000;
+}
+
+.scanner-viewport video {
+  border-radius: var(--radius-md);
+}
+
+.scanner-hint {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.scanner-error {
+  text-align: center;
+}
+
+.scanner-panel .btn--ghost {
+  width: 100%;
+  margin-top: var(--space-4);
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------------------
    14. Responsive Breakpoints
    -------------------------------------------------------------------------- */
 

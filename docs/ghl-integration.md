@@ -122,7 +122,15 @@ frontend) does not depend on this detail and won't need changes.
 
 ## Redemption write-back
 
-On redeem, the Worker updates the contact's `redemption_status` field to
+On redeem, the backend updates the contact's `redemption_status` field to
 `redeemed` and stamps `redeemed_at` with the current timestamp — no tags
 or opportunities are touched. If your reporting depends on a tag or
 pipeline stage instead, extend `redeemCustomerReward()` in `ghlClient.js`.
+
+### Optional audit field: redeemed_by
+
+The Express backend (`backend-render/`) can also record which employee
+performed the redemption (the name typed at PIN sign-in). This is off by
+default: create a text custom field in GHL (e.g. key `redeemed_by`), then
+set `GHL_FIELD_REDEEMED_BY=redeemed_by` on the backend service. While the
+env var is unset, the field is simply not written and nothing breaks.
