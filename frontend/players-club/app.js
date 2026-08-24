@@ -29,6 +29,13 @@
 
   const SESSION_TOKEN_KEY = "bp_employee_session";
 
+  // TEMPORARY: opt-in QR scanner diagnostics, e.g.
+  // https://.../index.html?qrdebug=1 — fully inert otherwise (no extra
+  // DOM visibility, no extra listeners fire, no change to normal scan
+  // behavior). Remove this flag and every QR_DEBUG_ENABLED branch below
+  // once the scanner issue is diagnosed.
+  const QR_DEBUG_ENABLED = new URLSearchParams(window.location.search).has("qrdebug");
+
   /* ------------------------------------------------------------------
    * Auth Service — employee session against the backend
    * ---------------------------------------------------------------- */
@@ -268,6 +275,14 @@
       scannerOverlay: document.getElementById("scannerOverlay"),
       scannerError: document.getElementById("scannerError"),
       btnCloseScanner: document.getElementById("btnCloseScanner"),
+
+      // TEMPORARY debug-only elements (see QR_DEBUG_ENABLED).
+      btnQrDebugTools: document.getElementById("btnQrDebugTools"),
+      qrDebugStats: document.getElementById("qrDebugStats"),
+      qrDebugOverlay: document.getElementById("qrDebugOverlay"),
+      qrDebugFileInput: document.getElementById("qrDebugFileInput"),
+      qrDebugFileResult: document.getElementById("qrDebugFileResult"),
+      btnCloseQrDebug: document.getElementById("btnCloseQrDebug"),
     };
 
     /** @type {object|null} Currently loaded customer record, held for redemption. */
@@ -467,6 +482,71 @@
       let instance = null;
       let starting = false;
 
+      /* ------------------------------------------------------------
+       * TEMPORARY diagnostics (QR_DEBUG_ENABLED only). Pure
+       * instrumentation: every branch below only records/displays
+       * state that already exists — it never changes what the
+       * scanner does, what counts as a successful/failed decode, or
+       * how a decoded value is parsed/handled.
+       * ---------------------------------------------------------- */
+      const debugStats = {
+        cameraOpened: false,
+        trackWidth: null,
+        trackHeight: null,
+        facingMode: null,
+        attempts: 0,
+        failures: 0,
+        lastDecodedText: "",
+        framesAdvancing: false,
+        state: "stopped",
+      };
+      let debugVideoWatcher = null;
+      let debugLastVideoTime = -1;
+
+      function renderDebugStats() {
+        if (!QR_DEBUG_ENABLED || !elements.qrDebugStats) return;
+        const video = document.querySelector("#qrReader video");
+        const lines = [
+          `1. Camera opened: ${debugStats.cameraOpened ? "YES" : "NO"}`,
+          `2. Track resolution: ${
+            debugStats.trackWidth && debugStats.trackHeight
+              ? `${debugStats.trackWidth} x ${debugStats.trackHeight}`
+              : "unknown"
+          }`,
+          `   Video element size: ${video ? `${video.videoWidth} x ${video.videoHeight}` : "n/a"}`,
+          `3. Facing mode: ${debugStats.facingMode || "unknown"}`,
+          `4. Receiving frames: ${debugStats.framesAdvancing ? "YES" : "NO / not yet observed"}`,
+          `5. Decode attempts: ${debugStats.attempts}`,
+          `6. Decode failures: ${debugStats.failures}`,
+          `7. Last decoded text: ${debugStats.lastDecodedText || "(none yet)"}`,
+          `8. Scanner state: ${debugStats.state}`,
+          `9. User agent: ${navigator.userAgent}`,
+        ];
+        elements.qrDebugStats.textContent = lines.join("\n");
+      }
+
+      /** Polls the live <video> element to prove frames are actually
+       * arriving, independent of whether the decoder can read them. */
+      function startDebugVideoWatcher() {
+        if (!QR_DEBUG_ENABLED) return;
+        stopDebugVideoWatcher();
+        debugLastVideoTime = -1;
+        debugVideoWatcher = setInterval(() => {
+          const video = document.querySelector("#qrReader video");
+          if (!video) return;
+          debugStats.framesAdvancing = video.currentTime !== debugLastVideoTime;
+          debugLastVideoTime = video.currentTime;
+          renderDebugStats();
+        }, 300);
+      }
+
+      function stopDebugVideoWatcher() {
+        if (debugVideoWatcher) {
+          clearInterval(debugVideoWatcher);
+          debugVideoWatcher = null;
+        }
+      }
+
       /**
        * Sizes the scan region as a fraction of the actual camera
        * viewfinder instead of a fixed 220px box. html5-qrcode crops the
@@ -528,6 +608,17 @@
         setError("");
         starting = true;
 
+        if (QR_DEBUG_ENABLED) {
+          elements.qrDebugStats.classList.remove("is-hidden");
+          debugStats.cameraOpened = false;
+          debugStats.trackWidth = null;
+          debugStats.trackHeight = null;
+          debugStats.facingMode = null;
+          debugStats.framesAdvancing = false;
+          debugStats.state = "starting";
+          renderDebugStats();
+        }
+
         try {
           instance = new window.Html5Qrcode("qrReader");
           await instance.start(
@@ -551,12 +642,39 @@
               },
             },
             onScanSuccess,
-            () => {
-              /* Per-frame decode misses are normal — never surface them. */
+            (/* errorMessage */) => {
+              // Per-frame decode misses are normal — never surface them.
+              // (Unchanged behavior. Debug bookkeeping below is additive
+              // and only runs when QR_DEBUG_ENABLED.)
+              if (QR_DEBUG_ENABLED) {
+                debugStats.attempts += 1;
+                debugStats.failures += 1;
+                renderDebugStats();
+              }
             }
           );
+
+          if (QR_DEBUG_ENABLED) {
+            debugStats.cameraOpened = true;
+            debugStats.state = "running";
+            try {
+              const settings = instance.getRunningTrackSettings();
+              debugStats.trackWidth = settings.width || null;
+              debugStats.trackHeight = settings.height || null;
+              debugStats.facingMode = settings.facingMode || null;
+            } catch (settingsError) {
+              console.warn("[qrdebug] getRunningTrackSettings failed:", settingsError);
+            }
+            renderDebugStats();
+            startDebugVideoWatcher();
+          }
         } catch (error) {
           instance = null;
+          if (QR_DEBUG_ENABLED) {
+            debugStats.cameraOpened = false;
+            debugStats.state = "stopped";
+            renderDebugStats();
+          }
           const message = String(error || "");
           if (/NotAllowedError|Permission/i.test(message)) {
             setError(
@@ -575,6 +693,11 @@
       async function close() {
         elements.scannerOverlay.classList.add("is-hidden");
         setError("");
+        if (QR_DEBUG_ENABLED) {
+          stopDebugVideoWatcher();
+          debugStats.state = "stopped";
+          renderDebugStats();
+        }
         const current = instance;
         instance = null;
         if (current) {
@@ -588,6 +711,11 @@
       }
 
       async function onScanSuccess(decodedText) {
+        if (QR_DEBUG_ENABLED) {
+          debugStats.attempts += 1;
+          debugStats.lastDecodedText = decodedText;
+          renderDebugStats();
+        }
         // Stop the camera immediately on a successful read.
         await close();
         const id = extractIdFromQrText(decodedText);
@@ -602,6 +730,45 @@
       }
 
       return { open, close, extractIdFromQrText };
+    })();
+
+    /* ------------------------------------------------------------------
+     * TEMPORARY: "Test Image" diagnostic (QR_DEBUG_ENABLED only).
+     *
+     * Answers, independently of the live camera: can html5-qrcode/ZXing
+     * decode this exact image file at all? Uses a throwaway Html5Qrcode
+     * instance bound to its own hidden element — never touches the live
+     * scanner's `instance`, never calls extractIdFromQrText/handleLookup.
+     * Purely a decode-yes/no + raw-text readout.
+     * ---------------------------------------------------------------- */
+    const QrFileDebug = (function () {
+      async function scanFile(file) {
+        if (!file) return;
+        if (typeof window.Html5Qrcode === "undefined") {
+          elements.qrDebugFileResult.textContent = "html5-qrcode did not load — cannot test.";
+          return;
+        }
+
+        elements.qrDebugFileResult.textContent = `Decoding "${file.name}" (${file.type || "unknown type"}, ${file.size} bytes)…`;
+
+        const scanner = new window.Html5Qrcode("qrDebugFileReader", { verbose: false });
+        try {
+          const result = await scanner.scanFileV2(file, false);
+          elements.qrDebugFileResult.textContent =
+            `DECODE SUCCEEDED\n\nRaw decoded text:\n${result.decodedText}`;
+        } catch (error) {
+          elements.qrDebugFileResult.textContent =
+            `DECODE FAILED\n\n${String(error && error.message ? error.message : error)}`;
+        } finally {
+          try {
+            scanner.clear();
+          } catch {
+            /* Nothing running to clear. */
+          }
+        }
+      }
+
+      return { scanFile };
     })();
 
     function bindEvents() {
@@ -629,10 +796,33 @@
       window.addEventListener("pagehide", () => {
         QrScanner.close();
       });
+
+      // TEMPORARY debug-only bindings — elements stay hidden/inert unless
+      // QR_DEBUG_ENABLED reveals them in init().
+      if (elements.btnQrDebugTools) {
+        elements.btnQrDebugTools.addEventListener("click", () => {
+          elements.qrDebugOverlay.classList.remove("is-hidden");
+        });
+      }
+      if (elements.btnCloseQrDebug) {
+        elements.btnCloseQrDebug.addEventListener("click", () => {
+          elements.qrDebugOverlay.classList.add("is-hidden");
+        });
+      }
+      if (elements.qrDebugFileInput) {
+        elements.qrDebugFileInput.addEventListener("change", (event) => {
+          const file = event.target.files && event.target.files[0];
+          QrFileDebug.scanFile(file);
+        });
+      }
     }
 
     async function init() {
       bindEvents();
+
+      if (QR_DEBUG_ENABLED && elements.btnQrDebugTools) {
+        elements.btnQrDebugTools.classList.remove("is-hidden");
+      }
 
       // Capture a QR deep link (?contactId= / ?membershipId=) up front so
       // it survives the login step. This preserves the existing behavior:
