@@ -468,6 +468,22 @@
       let starting = false;
 
       /**
+       * Sizes the scan region as a fraction of the actual camera
+       * viewfinder instead of a fixed 220px box. html5-qrcode crops the
+       * decode canvas to exactly this region, so a bigger box means more
+       * real pixels reach the decoder — important for the production Big
+       * Play QR, which has a centered logo and needs more of its
+       * surrounding modules in view to error-correct around it.
+       */
+      function qrboxFunction(viewfinderWidth, viewfinderHeight) {
+        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        const edge = Math.floor(minEdge * 0.75);
+        // Keep it sane on very small or very large viewfinders.
+        const clamped = Math.max(220, Math.min(edge, 500));
+        return { width: clamped, height: clamped };
+      }
+
+      /**
        * Accepts either a full QR URL (?contactId= / ?membershipId= / ?id=)
        * or a raw identifier, and returns the ID to look up, or "".
        */
@@ -516,7 +532,24 @@
           instance = new window.Html5Qrcode("qrReader");
           await instance.start(
             { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
+            {
+              fps: 10,
+              qrbox: qrboxFunction,
+              // Providing videoConstraints replaces the plain facingMode
+              // constraint above, so it's repeated here. Requesting a
+              // higher-resolution capture (not just a bigger UI box) is
+              // what actually gives the decoder more detail to work with
+              // on a stylized/logo QR — `ideal` degrades gracefully on
+              // devices/cameras that can't hit 1080p. `advanced` focus/
+              // exposure hints are best-effort and are simply ignored by
+              // browsers that don't support them (never throws).
+              videoConstraints: {
+                facingMode: "environment",
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                advanced: [{ focusMode: "continuous" }],
+              },
+            },
             onScanSuccess,
             () => {
               /* Per-frame decode misses are normal — never surface them. */

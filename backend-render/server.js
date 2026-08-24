@@ -5,6 +5,8 @@ const corsMiddleware = require("./middleware/cors");
 const authRouter = require("./routes/auth");
 const lookupRouter = require("./routes/lookup");
 const redemptionRouter = require("./routes/redemption");
+// TEMPORARY — diagnostic-only, see routes/debug.js. Remove after diagnosis.
+const debugRouter = require("./routes/debug");
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/customers", lookupRouter);
 app.use("/api/redemptions", redemptionRouter);
+// TEMPORARY — diagnostic-only, see routes/debug.js. Remove after diagnosis.
+app.use("/api/debug", debugRouter);
 
 app.use((req, res) => {
   res.status(404).json({ ok: false, reason: "not_found" });
