@@ -762,6 +762,41 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   13e. TEMPORARY — QR Scanner Debug Panel (?qrdebug=1 only)
+   Remove alongside QrDebug in app.js once the scanner issue is diagnosed.
+   -------------------------------------------------------------------------- */
+.qr-debug-entry {
+  margin-top: var(--space-4);
+  width: 100%;
+}
+
+.qr-debug-stats {
+  width: 100%;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: #0b0b0b;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-success);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.qr-debug-file-input {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* --------------------------------------------------------------------------
    14. Responsive Breakpoints
    -------------------------------------------------------------------------- */
 
