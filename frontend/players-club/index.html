@@ -102,14 +102,6 @@
             </div>
             <p class="field-hint">Try <code>BP-100234</code>, <code>BP-100777</code>, or <code>BP-100999</code> for demo data.</p>
           </form>
-
-          <!-- TEMPORARY diagnostic entry point. Only rendered when the
-               portal is opened with ?qrdebug=1 in the URL — invisible and
-               inert otherwise. See QrDebug in app.js. Remove alongside it
-               once the scanner issue is diagnosed. -->
-          <button class="btn btn--ghost btn--compact qr-debug-entry is-hidden" id="btnQrDebugTools" type="button">
-            QR Debug Tools
-          </button>
         </div>
 
         <!-- STATE: Loading -->
@@ -210,35 +202,7 @@
       <div class="scanner-viewport" id="qrReader"></div>
       <p class="scanner-hint" id="scannerHint">Point the camera at the customer's Players Club QR code.</p>
       <p class="error-text scanner-error" id="scannerError" role="alert"></p>
-      <!-- TEMPORARY: live camera/decoder diagnostics, ?qrdebug=1 only. -->
-      <pre class="qr-debug-stats is-hidden" id="qrDebugStats"></pre>
       <button class="btn btn--ghost btn--large" id="btnCloseScanner" type="button">Cancel</button>
-    </div>
-  </div>
-
-  <!-- ============================================================
-       TEMPORARY DEBUG-ONLY PANEL — ?qrdebug=1 only, invisible/inert
-       otherwise. Remove this block, its styles, and QrDebug in app.js
-       once the scanner issue is diagnosed. Does not call the backend,
-       does not touch auth/GHL/redemption, does not alter QR parsing.
-       ============================================================ -->
-  <div class="scanner-overlay is-hidden" id="qrDebugOverlay" role="dialog" aria-modal="true" aria-label="QR scanner diagnostics">
-    <div class="scanner-panel qr-debug-panel">
-      <h2 class="scanner-title">QR Scanner Diagnostics (Temporary)</h2>
-      <p class="scanner-hint">
-        Use <strong>Scan QR Code</strong> as normal &mdash; live stats appear in
-        that panel while the camera is open. Use this panel to test a saved
-        image of the production QR independently of the camera.
-      </p>
-
-      <p class="field-label field-label--spaced">Test Image (scanFile, no camera)</p>
-      <input type="file" accept="image/*" id="qrDebugFileInput" class="qr-debug-file-input" />
-      <!-- Required host element for the throwaway scanFileV2 instance;
-           kept out of layout, never shown (showImage passed as false). -->
-      <div id="qrDebugFileReader" class="is-hidden"></div>
-      <pre class="qr-debug-stats" id="qrDebugFileResult">No image tested yet.</pre>
-
-      <button class="btn btn--ghost btn--large" id="btnCloseQrDebug" type="button">Close</button>
     </div>
   </div>
 
