@@ -173,44 +173,6 @@ async function redeemCustomerReward(ghlContactId, redeemedAtIso, redeemedBy) {
 }
 
 /**
- * TEMPORARY DIAGNOSTIC HELPER — see routes/debug.js.
- *
- * Fetches a contact by GHL contact ID and returns ONLY its raw
- * customFields (key/id/value), stripped of every other contact
- * property (name, email, phone, address, etc.). Deliberately does not
- * reuse mapContactToCustomer() — this exists to show what GHL actually
- * sent, before any field-key mapping/fallback logic is applied, which is
- * the exact thing under investigation.
- *
- * Remove this function (and routes/debug.js, and its mount in server.js)
- * once the Promotion/Reward field-key mismatch is diagnosed and fixed.
- *
- * @returns {Promise<{contactId: string, customFields: Array<{key: string|undefined, id: string|undefined, value: *}>} | null>}
- */
-async function getRawCustomFields(contactId) {
-  const response = await axios.get(
-    `${GHL_API_BASE}/contacts/${encodeURIComponent(contactId)}`,
-    { headers: buildHeaders(), validateStatus: () => true }
-  );
-
-  if ([400, 404, 422].includes(response.status)) return null;
-  if (response.status < 200 || response.status >= 300) {
-    throw new Error(`GHL get contact failed (${response.status}): ${JSON.stringify(response.data)}`);
-  }
-
-  const contact = response.data.contact || response.data;
-  if (!contact || !contact.id) return null;
-
-  const customFields = (contact.customFields || []).map((entry) => ({
-    key: entry.key,
-    id: entry.id,
-    value: entry.value,
-  }));
-
-  return { contactId: contact.id, customFields };
-}
-
-/**
  * Shared validator for identifiers arriving from the browser (membership
  * IDs and GHL contact IDs). Rejects anything that couldn't be either.
  */
@@ -224,5 +186,4 @@ module.exports = {
   redeemCustomerReward,
   mapContactToCustomer,
   isValidCustomerId,
-  getRawCustomFields, // TEMPORARY — see routes/debug.js
 };
