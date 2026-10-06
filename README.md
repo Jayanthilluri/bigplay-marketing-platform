@@ -44,6 +44,22 @@ Demo membership IDs (mock mode):
 | `BP-100999` | Promotion expired |
 | anything else | Customer not found |
 
+## Module 2: Marketing Data — Google Ads Ingestion
+
+Server-side job that loads daily Google Ads performance into the Supabase
+warehouse (`raw` → `staging` → `core` → `analytics`), idempotently, with a
+7-day lookback. See [`docs/google-ads-ingestion.md`](docs/google-ads-ingestion.md).
+
+```bash
+cd ingestion/google-ads
+npm install
+cp .env.example .env          # server-side secrets; never commit
+npm test                      # unit tests, no credentials needed
+npm run google-ads:test       # DB connection + Google auth check
+npm run google-ads:dry-run    # fetch + validate, writes nothing
+npm run google-ads:sync       # today-7 .. today
+```
+
 ## Project Structure
 
 ```
@@ -66,8 +82,15 @@ backend/
   api/ routes/ controllers/ middleware/ services/
                         # Reserved for a future standalone Node/Express API
 
+ingestion/
+  google-ads/           # Google Ads -> Supabase ingestion job (server-side only)
+    bin/                # CLI: test-connection, test-auth, sync, backfill, status
+    src/                # API client, normalization, SQL, pipeline
+    test/               # unit + integration tests (local Postgres)
+
 docs/
   ghl-integration.md    # GHL field setup, secrets, deploy steps, pre-launch checklist
+  google-ads-ingestion.md  # Google Ads pipeline setup, flow, idempotency, troubleshooting
 ```
 
 ## Tech Stack

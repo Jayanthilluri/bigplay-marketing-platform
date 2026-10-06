@@ -1,0 +1,25 @@
+{
+  "name": "bigplay-google-ads-ingestion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server-side Google Ads -> Supabase ingestion pipeline (raw -> staging -> core).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "google-ads:test-connection": "node bin/google-ads.js test-connection",
+    "google-ads:test-auth": "node bin/google-ads.js test-auth",
+    "google-ads:test": "node bin/google-ads.js test-connection && node bin/google-ads.js test-auth",
+    "google-ads:dry-run": "node bin/google-ads.js sync --dry-run",
+    "google-ads:sync": "node bin/google-ads.js sync",
+    "google-ads:backfill": "node bin/google-ads.js backfill",
+    "google-ads:status": "node bin/google-ads.js status",
+    "test": "node --test \"test/unit/*.test.js\"",
+    "test:integration": "node --test --test-concurrency=1 \"test/integration/*.test.js\""
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.1"
+  }
+}
